@@ -1,87 +1,99 @@
 # token-optim
 
-**Fair-share AI budget autopilot.** Give your org a flat AI budget; token-optim
-splits it across users the way the data says works — small guaranteed floors,
-one big liquid pool, and pool draws prioritized by demonstrated use — and pushes
-the result to your LiteLLM proxy as real, enforced per-user budgets.
+Give your org a flat AI budget. token-optim splits it across users by
+demonstrated use — small guaranteed floors, one liquid pool, pool draws
+prioritized by who actually uses the stuff — and pushes the result to a
+LiteLLM proxy as real, enforced per-user budgets. Where no enforcement API
+exists (Copilot seats), it issues per-seat verdicts instead: keep, review,
+reclaim, with the decision rules printed on the report.
+
+The first time it processed a live Copilot seat, it recommended cancelling
+the subscription that had been bought to test it. The seat was unused. The
+verdict was correct.
 
 ```sh
 uvx --from token-optim token-optim ingest --csv usage.csv
 uvx --from token-optim token-optim allocate --period 2026-06
-uvx --from token-optim token-optim apply          # dry-run by default
+uvx --from token-optim token-optim apply       # dry-run by default
+python demo.py serve                           # seat report UI at localhost:8400
 ```
 
-## We falsified our own algorithm, and the replacement is what ships
+## The benchmark that picked the design
 
-This started as a research question: *how should a flat token budget be split
-across users whose demand is wildly unequal?* We built the clever thing first —
-EWMA demand forecasting, saturation probing, utilization-earned quotas — and
-benchmarked it against its own ablation (30 seeds, paired 95% CIs, 4 scenarios).
-
-**The ablation won.** Every token moved from a demand-revealing shared pool into
-a forecast-based quota was allocated strictly worse. So we inverted the
-architecture, and that version — DAFB-v2 — beat everything:
+The original allocator forecast per-user demand and pre-assigned quotas.
+Benchmarked against its own ablation (30 seeds, paired 95% CIs, 4
+scenarios), the ablation won everywhere: every token moved from the
+demand-revealing shared pool into a forecast-based quota allocated strictly
+worse. The shipped allocator (DAFB-v2) is the rebuild around that result.
 
 | Heavy-user unmet demand (stable scenario) | |
 |---|---|
 | equal split | 71.0 ± 1.6 % |
-| static tiers (industry practice) | 52.5 ± 3.1 % |
+| static tiers | 52.5 ± 3.1 % |
 | usage-proportional | 17.7 ± 0.9 % |
 | max-min water-filling | 9.7 ± 0.8 % |
-| **DAFB-v2 (this tool)** | **6.0 ± 0.9 %** |
+| **DAFB-v2** | **6.0 ± 0.9 %** |
 
 Waste drops from ~60% of budget (equal split) to ~2.5%. A strategic
-token-burner gains *nothing* (often negative) while a 4× equal-share draw cap
-makes the system mechanically vandalism-proof at a measured efficiency cost.
-Full methodology, ablations, incentive analysis, and the honest failure
-boundary: [REPORT.md](REPORT.md), raw numbers in [RESULTS.md](RESULTS.md).
+token-burner gains nothing (often negative); a 4× equal-share draw cap
+makes the system mechanically vandalism-proof at a measured efficiency
+cost. Methodology, ablations, incentive analysis, and the conditions where
+v2 does *not* win: [REPORT.md](REPORT.md). Raw numbers:
+[RESULTS.md](RESULTS.md). Regenerate them yourself: `python benchmark.py`.
 
-## What it does
+## What's in the box
 
-- **Ledger** (`ledger.py`) — normalizes per-user AI spend to dollars across
-  Anthropic (Usage/Cost + Claude Code Analytics APIs), GitHub Copilot billing,
+- `allocator.py` — DAFB-v2: demand-capped floors at half the equal share,
+  maximal liquid pool, utilization-weighted draws, exact water-filling.
+  Property-tested; budget conservation is an identity, not a tolerance.
+- `ledger.py` — per-user AI spend normalized to dollars across Anthropic
+  (Usage/Cost + Claude Code Analytics), GitHub Copilot billing + seats,
   LiteLLM spend logs, or any CSV. Unattributable spend is surfaced, never
-  silently averaged away.
-- **Allocator** (`allocator.py`) — DAFB-v2: demand-capped floors at half the
-  equal share, maximal liquid pool, utilization-weighted pool draws, exact
-  water-filling. 217-test property suite (budget conservation is an identity,
-  not a tolerance).
-- **Enforcement** (`enforcement.py`) — pushes floors as LiteLLM per-user
-  budgets and pool draws as capped dynamic raises, with a runtime guard that
-  the flat budget can never be exceeded. Dry-run by default.
-- **Advisory** (`advisory.py`) — where hard enforcement is impossible (Claude
-  Code seats, Copilot), generates per-user reports and seat-tier
-  recommendations instead, with the data-quality caveats stated.
-- **Calibration** (`calibrate.py`) — fits the simulator to *your* ledger and
-  re-runs the benchmark on your org's shape. The estimators self-validate by
-  recovering known synthetic ground truth.
+  averaged away.
+- `enforcement.py` — floors become LiteLLM per-user budgets; pool draws
+  become capped dynamic raises; a runtime guard keeps the flat budget an
+  invariant. Dry-run by default.
+- `advisory.py` — seat verdicts (keep / review / reclaim) from activity
+  data, plus seat-tier recommendations. The verdict rules live here once;
+  the GUI and the report consume the same generated spec.
+- `demo.py` — local web UI: upload an M365 Copilot usage export or a
+  GitHub seats payload, review each verdict, generate a branded report.
+  Processing is local; the file never leaves the machine.
+- `calibrate.py` — fits the simulator to your ledger and re-runs the
+  benchmark on your org's shape. Estimators self-validate against known
+  synthetic ground truth.
+- `gui/` — a React front-end for the seat-review workflow, styled as a
+  1968 federal memo. Storybook catalog included. (`cd gui && npm install
+  && npm run dev`)
 
-## What's enforceable where (the honest tier table)
+## What's enforceable where
 
 | Your setup | What token-optim can do |
 |---|---|
-| API traffic behind LiteLLM | **Hard per-user budgets + dynamic fair-share pool** |
-| Anthropic / OpenAI API direct | Coarse workspace/project limits + per-user advisories |
-| Claude Code seats, GitHub Copilot | Advisory reports + seat-tier recommendations (no per-user cap APIs exist — we say so rather than pretend) |
+| API traffic behind LiteLLM | Hard per-user budgets + dynamic fair-share pool |
+| Anthropic / OpenAI API direct | Coarse workspace limits + per-user advisories |
+| Claude Code seats, GitHub Copilot | Advisory reports + seat-tier recommendations — no per-user cap APIs exist |
 
-See [INTEGRATIONS.md](INTEGRATIONS.md) for the worked LiteLLM example.
+Worked LiteLLM example: [INTEGRATIONS.md](INTEGRATIONS.md).
 
 ## Install
 
 ```sh
-pip install token-optim        # or: uvx --from token-optim token-optim --help
+pip install token-optim    # or: uvx --from token-optim token-optim --help
 ```
 
-Pure Python, stdlib only, no dependencies.
+The Python package has zero dependencies.
 
 ## Development
 
 ```sh
-uv run --with pytest python -m pytest -q     # 217 tests
-python benchmark.py                          # regenerate RESULTS.md (~10s)
+pytest                        # Python suite
+cd gui && npx vitest run      # unit + browser-mode story tests
+python benchmark.py           # regenerate RESULTS.md (~10s)
 ```
 
-`DESIGN.md` has the formal model; `ROADMAP.md` is a generated project view.
+Formal model in [DESIGN.md](DESIGN.md). Contribution gates and house
+rules: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
