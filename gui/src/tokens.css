@@ -1,0 +1,884 @@
+/* ============================================================================
+   DESIGN LAW — "FEDERAL MEMO, 1968" (gui-5, interview-locked, think:63)
+   ----------------------------------------------------------------------------
+   Identity:  mid-century government-document brutalism, full-prop fidelity.
+   Type:      Archivo (display, incl. Black for stamps/mastheads),
+              IBM Plex Mono (evidence, figures, exhibits).
+   Density:   airy editorial. Motion: mechanical stamp & thunk.
+   Letterhead on every screen. All three verdicts are rubber stamps.
+   Dark mode is MICROFICHE: green-tinted near-black, phosphor-leaning ink.
+   Hard rules: radius 0 (paper doesn't round), no soft shadows (paper doesn't
+   float), values never lie, deterministic stamp tilt, reduced-motion zeroes
+   the physics, AA contrast in both themes.
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------ paper (manila stock) */
+  --paper: #efe4cc;          /* handled manila */
+  --paper-raised: #faf4e2;   /* fresh sheet — bright against the desk */
+  --paper-sunken: #e2d3b2;   /* older stock underneath */
+  --paper-grain-alpha: 0.05;
+
+  /* ----------------------------------------------------------- carbon ink */
+  --ink: #211d16;
+  --ink-muted: #564e3f;
+  --ink-faint: #7d745f;      /* decorative use only — not body text */
+  --rule-heavy: #211d16;     /* 2px double-strike rules */
+  --rule-hairline: #c0b194;
+
+  /* -------------------------------------------------------- verdict inks */
+  --verdict-keep: #2e5f33;    /* ledger green  */
+  --verdict-review: #7d5311;  /* clerk amber   */
+  --verdict-reclaim: #a02128; /* stamp red     */
+  --savings: #2e5f33;
+
+  /* ballpoint blue — links, focus, the agency accent */
+  --accent: #27418f;
+
+  /* ------------------------------------------------------------- type */
+  --font-display: "Archivo Variable", "Archivo", sans-serif;
+  --font-body: "Archivo Variable", "Archivo", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --size-body: 16px;
+  --size-evidence: 0.88em;
+  --size-headline: 2.6rem;
+  --size-poster: 4.2rem;
+  --track-caps: 0.07em;
+
+  /* ------------------------------------- spacing — airy editorial (4px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  /* ------------------------------------ motion — mechanical stamp&thunk */
+  --motion-snap: 60ms;
+  --motion-flight: 240ms;
+  --motion-meter: 360ms;
+  --ease-thunk: cubic-bezier(0.2, 0, 0, 1);
+  --ease-settle: cubic-bezier(0.34, 1.2, 0.64, 1);
+  /* Act I: the true thunk-and-settle spring, sampled as linear() —
+     fast strike, one heavy bounce, settle. Used by view transitions. */
+  --ease-spring: linear(
+    0, 0.38 14%, 0.78 28%, 1.06 45%, 0.985 62%, 1.004 78%, 1
+  );
+
+  --radius: 0px;          /* paper has corners */
+  --radius-pill: 0px;
+
+  /* paper grain — tiled SVG turbulence, theme-tunable via alpha */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.08 0 0 0 1.0 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.8'/%3E%3C/svg%3E");
+
+  /* paper fiber — stretched turbulence: the horizontal pull of laid stock */
+  --fiber: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.012 0.35' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 0.25 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)' opacity='0.5'/%3E%3C/svg%3E");
+
+  /* the desk under the paper (photoreal pass, gui-6): steel office green —
+     darkened in 6c so the sheets POP (value range was too compressed) */
+  --desk: #3a4138;
+  --desk-vignette: radial-gradient(
+    ellipse at 50% 30%,
+    rgba(255, 255, 255, 0.05),
+    rgba(0, 0, 0, 0.28) 95%
+  );
+  /* paper doesn't float — it LIES: contact shadow + soft ambient */
+  --sheet-lie: 0 1px 2px rgba(20, 24, 18, 0.45), 0 10px 36px rgba(20, 24, 18, 0.3);
+}
+
+/* gui-11 retina pass: on dense screens the same tiles carry finer noise —
+   feature size halves so grain stays paper, not upscaled mush. Overriding
+   the custom property retrofits every var(--grain)/var(--fiber) consumer. */
+@media (min-resolution: 2dppx) {
+  :root {
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.08 0 0 0 1.0 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.8'/%3E%3C/svg%3E");
+    --fiber: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.02 0.55' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 0.25 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+}
+
+/* ------------------------------------------------- MICROFICHE (dark) */
+[data-theme="dark"] {
+  --paper: #0c120d;
+  --paper-raised: #111a13;
+  --paper-sunken: #070b08;
+  --paper-grain-alpha: 0.08;
+  --ink: #cfe3cd;
+  --ink-muted: #93a892;
+  --ink-faint: #5f7060;
+  --rule-heavy: #cfe3cd;
+  --rule-hairline: #2c3a2e;
+  --verdict-keep: #6fcf7c;
+  --verdict-review: #d9a93f;
+  --verdict-reclaim: #ef6a64;
+  --savings: #6fcf7c;
+  --accent: #8fb4ff;
+
+  /* gui-11: the reader's raster — static horizontal scanlines, a CRT
+     microfiche viewer's tube. No motion, so reduced-motion-safe by nature. */
+  --scanline: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.18) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* ============================================================ base sheet */
+
+/* THE SCENE (gui-6): the viewport is a photographed desk; every element
+   belongs to a physical object lying on it. Nothing floats in a void. */
+body {
+  background-color: var(--desk);
+  background-image: var(--desk-vignette), var(--grain);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+/* the primary document on the desk */
+main {
+  background-color: var(--paper-raised);
+  background-image: var(--fiber), var(--grain);
+  border: 1px solid var(--rule-hairline);
+  box-shadow:
+    var(--sheet-lie),
+    inset 0 0 28px rgba(60, 48, 25, 0.07),
+    inset 0 0 3px rgba(60, 48, 25, 0.09);
+  margin: var(--space-8) auto !important;
+}
+
+/* an object lying on another: per-instance tilt via --lie-tilt (set from
+   stableHash — same determinism law as the stamps) */
+.lies {
+  transform: rotate(var(--lie-tilt, 0deg));
+  box-shadow:
+    0 1px 1.5px rgba(20, 24, 18, 0.3),
+    0 4px 14px rgba(20, 24, 18, 0.18),
+    inset 0 0 18px rgba(60, 48, 25, 0.06);
+}
+
+/* a smaller memo slip beside/below the main document */
+.slip {
+  background-color: var(--paper);
+  background-image: var(--grain);
+  border: 1px solid var(--rule-hairline);
+  box-shadow: var(--sheet-lie);
+  transform: rotate(-0.35deg);
+  padding: var(--space-4) var(--space-6);
+}
+
+/* Act III: when the GPU material is live, the canvas IS the desk — the CSS
+   desk steps aside (and remains the automatic fallback everywhere else) */
+[data-material="gpu"] body {
+  background-color: transparent;
+  background-image: none;
+  animation: none; /* Act II's desk-drift moves with the shader instead */
+}
+
+/* microfiche — film, not furniture: no desk, no lie shadows, scan vignette */
+[data-theme="dark"] body {
+  background-color: var(--paper);
+  background-image: radial-gradient(
+      ellipse at 50% 40%,
+      rgba(255, 255, 255, 0.02),
+      rgba(0, 0, 0, 0.35) 90%
+    ),
+    var(--scanline),
+    var(--grain);
+}
+[data-theme="dark"] main {
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+[data-theme="dark"] .lies,
+[data-theme="dark"] .slip {
+  transform: none;
+  box-shadow: none;
+  background-image: var(--grain);
+}
+/* a microfiche scan has no hardware */
+[data-theme="dark"] .staple {
+  display: none;
+}
+
+/* a sheet of paper laid on the desk: grain + handled-edge darkening */
+.sheet {
+  background-color: var(--paper-raised);
+  background-image: var(--grain);
+  border: 1px solid var(--rule-hairline);
+  box-shadow:
+    inset 0 0 24px rgba(60, 48, 25, 0.06),
+    inset 0 0 2px rgba(60, 48, 25, 0.08);
+}
+[data-theme="dark"] .sheet {
+  box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================== display */
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+/* gui-11 print-shop optics: Archivo is now the variable face (wght + wdth;
+   it carries NO opsz axis — verified fonts.google.com — so optical sizing
+   is cut by hand): poster/masthead sizes pull wide the way display cuts
+   were drawn wider, text sizes stay at normal width. font-optical-sizing
+   stays on for the day a face with a real opsz axis arrives. */
+body {
+  font-optical-sizing: auto;
+}
+h1, h2, h3, .display, .t-poster, .t-headline {
+  font-variation-settings: "wdth" 118;
+}
+.t-title {
+  font-variation-settings: "wdth" 110;
+}
+.stamp {
+  font-variation-settings: "wdth" 106;
+}
+
+/* cap-height trim on the big display lines — NOT Baseline yet (Firefox
+   148+ still flag-gated, caniuse June 2026), so guarded enhancement only */
+@supports (text-box: trim-both cap alphabetic) {
+  .t-poster, .t-headline {
+    text-box: trim-both cap alphabetic;
+  }
+}
+
+/* letterpress squeeze on display type — ink pressed into stock */
+.press {
+  text-shadow: 0.4px 0.5px 0.6px rgba(33, 29, 22, 0.28);
+}
+[data-theme="dark"] .press {
+  /* phosphor, not press: a tight core glow plus the tube's wide soft halo
+     (gui-11 bloom refinement) */
+  text-shadow:
+    0 0 2px rgba(207, 227, 205, 0.35),
+    0 0 6px rgba(207, 227, 205, 0.25),
+    0 0 18px rgba(143, 207, 143, 0.16);
+}
+
+/* double-strike rule — the imperfect twice-run line */
+.rule-double {
+  border: none;
+  border-top: 2px solid var(--rule-heavy);
+  box-shadow: 0 2.5px 0 -1px var(--rule-heavy);
+  margin: var(--space-2) 0 var(--space-4);
+  opacity: 0.92;
+}
+
+.mono, code, kbd {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ======================================================================
+   THE SYSTEM (gui-6d): every component styles itself ONLY through these
+   classes. Per-instance inline styles are reserved for data-driven values
+   (stamp tilt, stage color, view-transition names). If you're writing a
+   font-size in a component file, you're breaking the system.
+   ====================================================================== */
+
+/* ----- type scale: six steps, no other sizes exist ----- */
+.t-poster {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--size-poster);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+}
+.t-headline {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--size-headline);
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+}
+.t-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.45rem;
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+}
+.t-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+}
+.t-micro {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.t-figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.t-figure-lg {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 1.6rem;
+}
+
+/* ----- ink shades ----- */
+.muted { color: var(--ink-muted); }
+.strong { font-weight: 600; }
+.faint { color: var(--ink-faint); }
+.savings { color: var(--savings); }
+
+/* ----- furniture ----- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ledger th {
+  text-align: left;
+  padding: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+  border-bottom: 2px solid var(--rule-heavy);
+}
+.ledger td {
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--rule-hairline);
+}
+.ledger .evidence {
+  font-size: 0.88em;
+}
+.ledger .num {
+  text-align: right;
+}
+.section-head {
+  font-size: 0.85rem;
+  color: var(--ink);
+  border-bottom: 3px solid var(--rule-heavy);
+  padding-bottom: var(--space-2);
+  display: flex;
+  justify-content: space-between;
+}
+.btn-primary {
+  background-color: var(--ink);
+  color: var(--paper-raised);
+  border-color: var(--ink);
+}
+[data-theme="dark"] .btn-primary {
+  color: var(--paper);
+}
+.stack-2 > * + * { margin-top: var(--space-2); }
+.stack-4 > * + * { margin-top: var(--space-4); }
+
+/* ----- the page: every screen's document frame (gui-13 audit) ----- */
+.page {
+  padding: var(--space-6) var(--space-8);
+  max-width: 880px;
+  margin: 0 auto;
+}
+.page-wide {
+  padding: 0 var(--space-8) var(--space-8);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ----- layout utilities: the only sanctioned one-off geometry ----- */
+.row-baseline {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.block { display: block; }
+.flex-1 { flex: 1; }
+.pos-rel { position: relative; }
+.nowrap { white-space: nowrap; }
+.ta-right { text-align: right; }
+.ink { color: var(--ink); }
+.reclaim-ink { color: var(--verdict-reclaim); }
+.m-0 { margin: 0; }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-12 { margin-top: var(--space-12); }
+.my-6 { margin: var(--space-6) 0; }
+.mr-2 { margin-right: var(--space-2); }
+.ml-2 { margin-left: var(--space-2); }
+
+/* a button that holds content without wearing button furniture */
+.btn-bare {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+/* the ceremony button — the one size-up control (seal/confirm) */
+.btn-lg {
+  font-size: 1rem;
+  padding: var(--space-2) var(--space-4);
+}
+/* report lead paragraph — the sanctioned large body size of the
+   client deliverable (mirrors demo.py's MEMO_CSS lead) */
+.lead {
+  font-size: 1.35rem;
+  line-height: 1.4;
+}
+
+/* ----- THE CLARITY LAYER (gui-14): plain register under the Memo voice ----- */
+/* the one-line plain-language subtitle under every masthead */
+.screen-sub {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ink-muted);
+  max-width: 64ch;
+  margin: var(--space-2) 0 var(--space-4);
+}
+/* a glossed Memo term: same ink, dotted underwriting, help cursor */
+.gloss {
+  text-decoration: underline dotted var(--ink-faint);
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.gloss:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+/* the first-run explainer slip — accent-edged so it reads as a note,
+   not part of the document */
+.first-run {
+  border-left: 4px solid var(--accent);
+  margin: var(--space-4) 0;
+  font-size: 0.95rem;
+  text-transform: none;
+  letter-spacing: normal;
+  max-width: 72ch;
+}
+/* the stated rules, on the record (gui-15): a clarity-layer disclosure.
+   Closed it reads like a glossed term; open it files in as a small memo
+   margin-note (hairline edge — reference material, not an alert). */
+.rules-panel {
+  margin: var(--space-2) 0 var(--space-4);
+}
+.rules-panel > summary {
+  cursor: pointer;
+  color: var(--ink-muted);
+  width: fit-content;
+}
+.rules-panel > summary:hover {
+  color: var(--ink);
+}
+.rules-panel > summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.rules-panel[open] {
+  border-left: 4px solid var(--rule-hairline);
+  padding-left: var(--space-4);
+}
+.rules-panel dt {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+/* an empty space that explains itself */
+.empty-state {
+  border: 1px dashed var(--rule-hairline);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+}
+.empty-state > * + * {
+  margin-top: var(--space-2);
+}
+
+/* typewriter form lines (gui-6c sweep) */
+.evidence-panel {
+  font-size: var(--size-evidence);
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  margin: var(--space-4) 0;
+}
+.evidence-panel dt {
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  font-size: 0.82em;
+  letter-spacing: 0.06em;
+}
+.evidence-panel dd {
+  margin: 0;
+}
+
+/* ======================================================================
+   COMPONENT ROOTS (gui-13): each component's static dress lives HERE, on
+   its marker class. Inline style on a component carries ONLY data-driven
+   values (tilt custom props, stage/verdict/brand colors, vt names).
+   ====================================================================== */
+
+/* the case file on the stand (Hearing) — tilt + vt name stay inline */
+.stand {
+  position: relative;
+  padding: var(--space-8);
+  margin: var(--space-8) auto;
+  max-width: 540px;
+}
+/* the case-file title line under the masthead */
+.case-title {
+  margin: var(--space-2) 0 var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+/* the Run Board's four-column docket */
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+.column-empty {
+  color: var(--ink-faint);
+  border: 1px dashed var(--rule-hairline);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  text-align: center;
+}
+
+/* a client's index card — stage color, tilt, vt name stay inline */
+.client-tile {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  color: var(--ink);
+}
+.tile-stats {
+  border-top: 1px solid var(--rule-hairline);
+  padding-top: var(--space-2);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* the data-caveats footnote */
+.caveat-block {
+  border-top: 1px solid var(--rule-hairline);
+  margin-top: var(--space-6);
+  padding: var(--space-3) 0 0;
+  line-height: 1.6;
+}
+
+/* the masthead row (scroll behavior lives in the Act II section) */
+.letterhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) 0 var(--space-3);
+}
+.letterhead .lh-sub {
+  margin-top: 2px; /* optical: hugs the agency line */
+}
+
+/* the QBR pack card */
+.qbr-pack {
+  border: 1px solid var(--rule-hairline);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  background: var(--paper-raised);
+}
+
+/* one period on the EXHIBIT strip — sealed is ink+accent, open is dashed */
+.snapshot-point {
+  color: var(--ink-muted);
+  border-bottom: 2px dashed var(--rule-hairline);
+  padding: 0 var(--space-2);
+}
+.snapshot-point[data-sealed="true"] {
+  color: var(--ink);
+  border-bottom: 2px solid var(--accent);
+}
+
+/* a decided case's ledger row — vt name stays inline */
+.verdict-row {
+  border-bottom: 1px solid var(--rule-hairline);
+}
+
+/* the report sheet + the archive's pressed crest */
+.report-sheet {
+  padding: var(--space-8);
+}
+.archive-crest {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-6);
+  transform: rotate(8deg);
+}
+.seal-crest {
+  opacity: 0.85;
+}
+
+/* office hardware placement (visibility law lives in the dark section) */
+.staple {
+  position: absolute;
+  top: -5px;
+  left: 22px;
+  transform: rotate(-4deg);
+}
+
+/* the MSP brand swatch — its background IS customer data, stays inline */
+.brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.brand-swatch {
+  width: 0.9em;
+  height: 0.9em;
+  border-radius: 2px; /* the one rounded corner: it's a chip, not paper */
+  display: inline-block;
+}
+
+/* zero-size SVG defs carrier (ink-bleed filter) */
+.svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* Act III's GPU desk canvas — behind everything, layout-inert */
+.desk-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: none;
+  width: 100vw;
+  height: 100vh;
+}
+.desk-canvas[data-active="true"] {
+  display: block;
+}
+
+/* ============================================================== controls */
+
+button {
+  font: inherit;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+  font-weight: 600;
+  font-size: 0.82em;
+  color: var(--ink);
+  background-color: var(--paper-raised);
+  background-image: var(--grain);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  transition: transform var(--motion-snap) var(--ease-thunk),
+    background-color var(--motion-snap);
+}
+button:hover:not(:disabled) {
+  background-color: var(--paper-sunken);
+}
+button:active:not(:disabled) {
+  transform: translateY(1px); /* the thunk */
+}
+button:disabled {
+  color: var(--ink-faint);
+  border-color: var(--ink-faint);
+  cursor: default;
+}
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+button[aria-pressed="true"] {
+  background-color: var(--ink);
+  color: var(--paper-raised);
+}
+[data-theme="dark"] button[aria-pressed="true"] {
+  color: var(--paper);
+}
+
+select {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--ink-muted);
+  border-radius: 0;
+  padding: 2px var(--space-2);
+}
+
+/* ================================================================ stamps */
+
+@keyframes stamp-land {
+  0% {
+    transform: scale(1.5) rotate(var(--stamp-tilt, 0deg));
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.96) rotate(var(--stamp-tilt, 0deg));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(var(--stamp-tilt, 0deg));
+  }
+}
+
+.stamp {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.95em;
+  padding: 2px 12px 1px;
+  border: 3px solid currentColor;
+  transform: rotate(var(--stamp-tilt, 0deg));
+  animation: stamp-land var(--motion-flight) var(--ease-settle) backwards;
+  filter: url(#ink-bleed);
+  mix-blend-mode: multiply;
+}
+[data-theme="dark"] .stamp {
+  mix-blend-mode: screen;
+}
+
+/* ============================================== Act II: the living desk */
+/* Pure scroll/view timelines — declarative depth, no JS. Non-supporting
+   browsers and reduced-motion users get the static scene unchanged. */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    /* the desk drifts slower than the sheet — parallax depth */
+    @keyframes desk-drift {
+      to {
+        background-position:
+          0 -40px,
+          0 0;
+      }
+    }
+    body {
+      animation: desk-drift linear both;
+      animation-timeline: scroll(root);
+    }
+
+    /* the masthead settles into a slimmer bar as the docket scrolls */
+    @keyframes lh-compress {
+      to {
+        transform: scale(0.82);
+        transform-origin: left center;
+        padding-top: var(--space-2);
+        padding-bottom: var(--space-1);
+      }
+    }
+    .letterhead {
+      animation: lh-compress linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 140px;
+    }
+
+    /* the docket-progress rule — a true instrument: scaleX IS scroll
+       position (values never lie, even decorative ones) */
+    .letterhead::after {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      margin-top: var(--space-2);
+      height: 2px;
+      background: var(--ink);
+      transform-origin: left center;
+      transform: scaleX(0);
+      animation: docket-progress linear both;
+      animation-timeline: scroll(root);
+    }
+    @keyframes docket-progress {
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    /* ledger rows develop as they enter view — fade + settle */
+    @keyframes row-develop {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .verdict-row {
+      animation: row-develop linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+.letterhead {
+  position: relative; /* anchors the docket-progress rule */
+}
+
+/* ===================================================== view transitions */
+
+/* Act I: every shared-element morph moves like office machinery —
+   the spring curve, the flight duration. The root cross-fade stays snappy. */
+::view-transition-group(*) {
+  animation-duration: var(--motion-flight);
+  animation-timing-function: var(--ease-spring);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--motion-snap);
+}
+
+/* =============================================================== motion */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-snap: 0ms;
+    --motion-flight: 0ms;
+    --motion-meter: 0ms;
+  }
+  .stamp {
+    animation: none;
+  }
+  /* belt + suspenders: withTransition already skips the API, but if a
+     transition starts anyway, it renders instantly */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

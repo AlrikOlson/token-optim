@@ -1,0 +1,15 @@
+
+.venv/
+*.egg-info/
+uv.lock
+dist/
+__pycache__/
+gui/node_modules/
+gui/dist/
+# scrutiny screenshots land at root during /gui-scrutiny runs; the kept
+# record lives in docs/scrutiny/
+/*.png
+.playwright-mcp/
+gui/storybook-static/
+gui/*.tsbuildinfo
+docs/scrutiny/

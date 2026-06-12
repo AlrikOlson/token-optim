@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "thresholds": {
+    "reclaim_after_days": 45,
+    "review_after_days": 14,
+    "single_app_max": 1
+  },
+  "stated": [
+    {
+      "verdict": "keep",
+      "description": "Active in the last 14 days (across 2+ apps, where app-level data exists \u2014 M365; GitHub Copilot reports activity only)"
+    },
+    {
+      "verdict": "review",
+      "description": "Last activity 15-45 days ago, or single-app use where app-level data exists"
+    },
+    {
+      "verdict": "reclaim",
+      "description": "No Copilot activity in 45+ days (or never)"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+<!doctype html><html><head><meta charset="utf-8"><title>AI License Right-Sizing — Fabrikam Manufacturing</title><style>
+ :root { --paper:#f0e6d2; --sheet:#f7efdd; --ink:#211d16; --muted:#564e3f;
+         --hairline:#c0b194; --accent:#1f6feb; }
+ body { background:#4a5248
+        radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.05),
+        rgba(0,0,0,.28) 95%); color:var(--ink); margin:0; padding:2rem 1rem;
+        min-height:100vh;
+        font:15px/1.55 'Archivo','Helvetica Neue',Arial,sans-serif; }
+ .doc { max-width:860px; margin:0 auto; background:var(--sheet)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.08 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+        border:1px solid var(--hairline); padding:2.5rem 3rem;
+        box-shadow:0 1px 2px rgba(20,24,18,.45), 0 10px 36px rgba(20,24,18,.3),
+        inset 0 0 24px rgba(60,48,25,.07); }
+ h1,h2,.disp { text-transform:uppercase; letter-spacing:.07em;
+        font-weight:900; line-height:1.15; }
+ .rule2 { border:none; border-top:2px solid var(--ink);
+        box-shadow:0 2.5px 0 -1px var(--ink); margin:.5rem 0 1.2rem; }
+ .mono { font-family:'IBM Plex Mono','Courier New',monospace;
+        font-variant-numeric:tabular-nums; }
+ .meta { color:var(--muted); }
+ .lh { display:flex; align-items:center; gap:1rem; }
+ .lh .agency { font-size:1rem; }
+ .lh .docket { font-size:.72rem; color:var(--muted); letter-spacing:.08em; }
+ .stamp { display:inline-block; font-weight:900; text-transform:uppercase;
+        letter-spacing:.12em; font-size:.74em; padding:1px 8px 0;
+        border:2.5px solid currentColor; }
+ table { border-collapse:collapse; width:100%; }
+ th { text-transform:uppercase; font-size:.72rem; letter-spacing:.07em; }
+ th,td { text-align:left; padding:.5rem .6rem;
+        border-bottom:1px solid var(--hairline); }
+ .num { text-align:right; }
+ .rules { border:1px solid var(--hairline); padding:.8rem 1.2rem;
+        margin:1.2rem 0; }
+ footer { margin-top:2rem; padding-top:.8rem; color:var(--muted);
+        border-top:1px solid var(--hairline); font-size:.8em; }
+ button { font:inherit; font-weight:600; text-transform:uppercase;
+        letter-spacing:.07em; font-size:.82em; color:var(--ink);
+        background:var(--sheet); border:2px solid var(--ink); border-radius:0;
+        padding:.4rem 1rem; cursor:pointer; }
+ @media print { body { background:#fff; padding:0; }
+        .doc { border:none; box-shadow:none; background:#fff; }
+        .noprint { display:none; } }
+</style></head>
+<body><div class="doc">
+<div class="lh"><svg width="44" height="44" viewBox="0 0 44 44" role="img"
+ aria-label="Office of Seat Utilization Review crest">
+ <circle cx="22" cy="22" r="20" fill="none" stroke="currentColor" stroke-width="2.5"/>
+ <circle cx="22" cy="22" r="15.5" fill="none" stroke="currentColor" stroke-width="1"/>
+ <text x="22" y="20" text-anchor="middle" font-size="9" font-weight="900"
+  font-family="Arial">OSUR</text>
+ <text x="22" y="31" text-anchor="middle" font-size="9">&#9878;</text></svg><div><div class="disp agency">Office of Seat Utilization Review</div><div class="docket mono">PREPARED BY NORTHWIND IT PARTNERS · 28 COPILOT SEATS ANALYZED</div></div></div><hr class='rule2'>
+<h1 style="font-size:1.5rem;margin:.4rem 0">AI License Right-Sizing Report</h1>
+<p class="meta">Prepared for <b>Fabrikam Manufacturing</b> by
+ <b>Northwind IT Partners</b></p>
+<p class="headline" style="font-size:1.5rem">Projected savings:
+ <b class="mono" style="color:#1f6feb">$420/month</b>
+ ($5,040/year) — 14 seats to reclaim,
+ 6 to review, 8 actively used.</p>
+<div class="rules"><b class="disp" style="font-size:.78rem">How verdicts are decided</b>
+(based on Microsoft 365 Copilot activity data; seat cost
+$30/mo):
+<ul><li><b>Keep:</b> Active in the last 14 days (across 2+ apps, where app-level data exists — M365; GitHub Copilot reports activity only)</li><li><b>Review:</b> Last activity 15-45 days ago, or single-app use where app-level data exists</li><li><b>Reclaim:</b> No Copilot activity in 45+ days (or never)</li></ul></div>
+<table><thead><tr><th>User</th><th>Verdict</th><th>Why</th>
+<th class="num">Monthly saving</th></tr></thead><tbody>
+<tr><td class='mono'>amanda.king@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-0.5deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>amy.zhao@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(1.5deg)'>Reclaim</span></td><td class='mono meta'>inactive 49 days</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>bob.tanner@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(1.0deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>dan.murphy@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-1.5deg)'>Reclaim</span></td><td class='mono meta'>inactive 79 days</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>hal.jordan@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-1.0deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>iris.west@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(0.0deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>kara.danvers@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-2.0deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>mark.olsen@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-0.5deg)'>Reclaim</span></td><td class='mono meta'>inactive 83 days</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>pete.sullivan@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-1.0deg)'>Reclaim</span></td><td class='mono meta'>inactive 81 days</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>ray.palmer@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-1.5deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>rosa.lima@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(1.0deg)'>Reclaim</span></td><td class='mono meta'>inactive 47 days</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>sue.ellis@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(0.5deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>tina.gomez@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-1.0deg)'>Reclaim</span></td><td class='mono meta'>inactive 51 days</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>victor.cruz@fabrikam-demo.com</td><td><span class='stamp' style='color:#a02128;transform:rotate(-0.5deg)'>Reclaim</span></td><td class='mono meta'>never used Copilot</td><td class='num mono'>$30</td></tr>
+<tr><td class='mono'>chris.lee@fabrikam-demo.com</td><td><span class='stamp' style='color:#7d5311;transform:rotate(-0.5deg)'>Review</span></td><td class='mono meta'>last active 24d ago, 1 app(s) in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>emily.watts@fabrikam-demo.com</td><td><span class='stamp' style='color:#7d5311;transform:rotate(-1.5deg)'>Review</span></td><td class='mono meta'>last active 23d ago, 1 app(s) in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>julia.brandt@fabrikam-demo.com</td><td><span class='stamp' style='color:#7d5311;transform:rotate(-1.0deg)'>Review</span></td><td class='mono meta'>last active 27d ago, 1 app(s) in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>nina.petrov@fabrikam-demo.com</td><td><span class='stamp' style='color:#7d5311;transform:rotate(2.0deg)'>Review</span></td><td class='mono meta'>last active 25d ago, 1 app(s) in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>omar.hassan@fabrikam-demo.com</td><td><span class='stamp' style='color:#7d5311;transform:rotate(1.5deg)'>Review</span></td><td class='mono meta'>last active 26d ago, 1 app(s) in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>raj.kumar@fabrikam-demo.com</td><td><span class='stamp' style='color:#7d5311;transform:rotate(0.5deg)'>Review</span></td><td class='mono meta'>last active 22d ago, 1 app(s) in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>ana.silva@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(1.0deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>dev.patel@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(0.5deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>james.okafor@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(-1.0deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>kate.morris@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(-1.5deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>lena.fischer@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(1.0deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>maria.chen@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(1.5deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>sofia.reyes@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(0.0deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+<tr><td class='mono'>tom.nguyen@fabrikam-demo.com</td><td><span class='stamp' style='color:#2e5f33;transform:rotate(0.5deg)'>Keep</span></td><td class='mono meta'>active, 3 apps in the last month</td><td class='num mono'>—</td></tr>
+</tbody></table>
+<footer class="mono">Generated by token-optim. Activity data from the Microsoft 365 Copilot usage report; no message content is accessed. Verdicts are
+recommendations — review before reclaiming seats.</footer>
+</div></body></html>

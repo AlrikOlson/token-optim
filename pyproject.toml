@@ -1,0 +1,33 @@
+[project]
+name = "token-optim"
+version = "0.1.0"
+description = "Fair-share AI budget autopilot: demand-adaptive flat-budget allocation (DAFB-v2) with LiteLLM enforcement, multi-provider spend ledger, and advisory reports"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = []
+keywords = ["llm", "budget", "finops", "litellm", "token", "allocation", "fair-share"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Systems Administration",
+]
+
+[project.urls]
+Repository = "https://github.com/alrikolson/token-optim"
+Documentation = "https://github.com/alrikolson/token-optim#readme"
+
+[project.scripts]
+token-optim = "cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+include = ["*.py"]
+
+[dependency-groups]
+dev = ["pytest"]
