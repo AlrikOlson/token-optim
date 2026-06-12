@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>token-optim — fair-share AI budget allocation</title>
+<meta name="description" content="Split a flat AI budget by demonstrated use. Enforce it where APIs allow; issue per-seat verdicts where they don't. MIT.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Federal Memo, 1968 — tokens verbatim from the app's design law
+   (gui/src/tokens.css). Single file, no build, radius 0: paper has corners. */
+:root {
+  --paper: #efe4cc;
+  --paper-raised: #faf4e2;
+  --paper-sunken: #e2d3b2;
+  --ink: #211d16;
+  --ink-muted: #564e3f;
+  --ink-faint: #7d745f;
+  --rule-heavy: #211d16;
+  --rule-hairline: #c0b194;
+  --verdict-keep: #2e5f33;
+  --verdict-review: #7d5311;
+  --verdict-reclaim: #a02128;
+  --savings: #2e5f33;
+  --accent: #27418f;
+  --desk: #3a4138;
+  --font-display: "Archivo", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --track-caps: 0.07em;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.08 0 0 0 1.0 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.8'/%3E%3C/svg%3E");
+  --fiber: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.012 0.35' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 0.25 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)' opacity='0.5'/%3E%3C/svg%3E");
+  --desk-vignette: radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.05), rgba(0,0,0,.28) 95%);
+  --sheet-lie: 0 1px 2px rgba(20,24,18,.45), 0 10px 36px rgba(20,24,18,.3);
+}
+@media (prefers-color-scheme: dark) {
+  /* microfiche: film, not furniture */
+  :root {
+    --paper: #0c120d;
+    --paper-raised: #111a13;
+    --paper-sunken: #070b08;
+    --ink: #cfe3cd;
+    --ink-muted: #93a892;
+    --ink-faint: #5f7060;
+    --rule-heavy: #cfe3cd;
+    --rule-hairline: #2c3a2e;
+    --verdict-keep: #6fcf7c;
+    --verdict-review: #d9a93f;
+    --verdict-reclaim: #ef6a64;
+    --savings: #6fcf7c;
+    --accent: #8fb4ff;
+    --scanline: repeating-linear-gradient(to bottom, rgba(0,0,0,.18) 0 1px, transparent 1px 3px);
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--desk);
+  background-image: var(--desk-vignette), var(--grain);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 1.55;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--paper);
+    background-image: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.02), rgba(0,0,0,.35) 90%), var(--scanline), var(--grain);
+  }
+}
+main {
+  max-width: 860px;
+  margin: 3rem auto;
+  padding: 3rem 3.5rem 2.5rem;
+  background-color: var(--paper-raised);
+  background-image: var(--fiber), var(--grain);
+  border: 1px solid var(--rule-hairline);
+  box-shadow: var(--sheet-lie), inset 0 0 28px rgba(60,48,25,.07);
+}
+@media (prefers-color-scheme: dark) {
+  main { background-color: transparent; background-image: none; border: none; box-shadow: none; }
+}
+@media (max-width: 700px) { main { margin: 0; padding: 1.5rem 1.25rem; } }
+
+h1, h2 {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+  line-height: 1.1;
+}
+h1 { font-size: 2.8rem; margin: .4rem 0 0; }
+h2 {
+  font-size: .85rem;
+  border-bottom: 3px solid var(--rule-heavy);
+  padding-bottom: .5rem;
+  margin: 2.5rem 0 1rem;
+}
+.press { text-shadow: .4px .5px .6px rgba(33,29,22,.28); }
+@media (prefers-color-scheme: dark) {
+  .press { text-shadow: 0 0 2px rgba(207,227,205,.35), 0 0 6px rgba(207,227,205,.25), 0 0 18px rgba(143,207,143,.16); }
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: .74rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.rule2 {
+  border: none;
+  border-top: 2px solid var(--rule-heavy);
+  box-shadow: 0 2.5px 0 -1px var(--rule-heavy);
+  margin: .75rem 0 1.5rem;
+  opacity: .92;
+}
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-muted); }
+.lead { font-size: 1.2rem; line-height: 1.45; }
+
+/* the case slip — the anecdote lies on the sheet */
+.slip {
+  background-color: var(--paper);
+  background-image: var(--grain);
+  border: 1px solid var(--rule-hairline);
+  box-shadow: var(--sheet-lie);
+  transform: rotate(-0.35deg);
+  padding: 1rem 1.5rem;
+  margin: 1.75rem 0;
+}
+@media (prefers-color-scheme: dark) { .slip { transform: none; box-shadow: none; } }
+
+pre.cmd {
+  font-family: var(--font-mono);
+  font-size: .85rem;
+  background: var(--paper-sunken);
+  border: 1px solid var(--rule-hairline);
+  padding: .9rem 1.1rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+}
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th {
+  text-align: left;
+  padding: .5rem;
+  font-weight: 600;
+  font-size: .74rem;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+  border-bottom: 2px solid var(--rule-heavy);
+}
+td { padding: .5rem; border-bottom: 1px solid var(--rule-hairline); }
+td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+tr.us td { font-weight: 600; color: var(--savings); }
+
+.stamp {
+  display: inline-block;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: .95em;
+  padding: 2px 12px 1px;
+  border: 3px solid currentColor;
+  filter: url(#ink-bleed);
+  mix-blend-mode: multiply;
+}
+@media (prefers-color-scheme: dark) { .stamp { mix-blend-mode: screen; } }
+.verdicts { display: grid; grid-template-columns: max-content 1fr; gap: .9rem 1.25rem; align-items: start; margin: 1.25rem 0; }
+.verdicts p { margin: .15rem 0 0; font-size: .95rem; }
+
+a { color: var(--accent); }
+.btnrow { margin: 1.5rem 0 .5rem; }
+a.btn {
+  display: inline-block;
+  font-weight: 600;
+  font-size: .82em;
+  text-transform: uppercase;
+  letter-spacing: var(--track-caps);
+  text-decoration: none;
+  color: var(--ink);
+  background-color: var(--paper-raised);
+  background-image: var(--grain);
+  border: 2px solid var(--ink);
+  padding: .5rem 1rem;
+  margin-right: .75rem;
+}
+a.btn:hover { background-color: var(--paper-sunken); }
+a.btn.primary { background-color: var(--ink); background-image: none; color: var(--paper-raised); }
+@media (prefers-color-scheme: dark) { a.btn.primary { color: var(--paper); } }
+
+footer {
+  margin-top: 2.5rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--rule-hairline);
+  font-family: var(--font-mono);
+  font-size: .74rem;
+  color: var(--ink-muted);
+}
+.svg-defs { position: absolute; width: 0; height: 0; }
+</style>
+</head>
+<body>
+<svg class="svg-defs" aria-hidden="true"><filter id="ink-bleed">
+  <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" result="edge"/>
+  <feDisplacementMap in="SourceGraphic" in2="edge" scale="1.7" result="shaped"/>
+  <feTurbulence type="fractalNoise" baseFrequency="0.45" numOctaves="2" result="pad"/>
+  <feColorMatrix in="pad" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.6 -0.25" result="padAlpha"/>
+  <feComposite in="shaped" in2="padAlpha" operator="in"/>
+</filter></svg>
+
+<main>
+  <header>
+    <span class="eyebrow">Fair-share AI budget allocation · MIT · pure Python, zero dependencies</span>
+    <h1 class="press">token-optim</h1>
+    <hr class="rule2">
+  </header>
+
+  <p class="lead">Give your org a flat AI budget. token-optim splits it by
+  demonstrated use — small guaranteed floors, one liquid pool, draws go to
+  people who actually use the stuff — and pushes the result to a LiteLLM
+  proxy as real, enforced per-user budgets. Where no enforcement API exists,
+  it issues per-seat verdicts instead.</p>
+
+  <div class="slip">
+    <span class="eyebrow">Case file · first live run</span>
+    <p style="margin:.4rem 0 0">The first time it processed a live Copilot
+    seat, it recommended cancelling the subscription that had been bought to
+    test it. The seat was unused. The verdict was correct.</p>
+  </div>
+
+  <pre class="cmd">uvx --from token-optim token-optim ingest --csv usage.csv
+uvx --from token-optim token-optim allocate --period 2026-06
+uvx --from token-optim token-optim apply       # dry-run by default</pre>
+
+  <div class="btnrow">
+    <a class="btn primary" href="https://github.com/AlrikOlson/token-optim">GitHub</a>
+    <a class="btn" href="https://github.com/AlrikOlson/token-optim/blob/main/REPORT.md">The report</a>
+    <a class="btn" href="https://github.com/AlrikOlson/token-optim/blob/main/RESULTS.md">Raw numbers</a>
+  </div>
+
+  <h2>The benchmark that picked the design</h2>
+  <p>The original allocator forecast per-user demand and pre-assigned
+  quotas. Benchmarked against its own ablation — 30 seeds, paired 95% CIs,
+  4 scenarios — the ablation won everywhere. The shipped allocator is the
+  rebuild around that result.</p>
+  <table>
+    <thead><tr><th>Allocator</th><th style="text-align:right">Heavy-user unmet demand (stable)</th></tr></thead>
+    <tbody>
+      <tr><td>equal split</td><td class="num">71.0 ± 1.6 %</td></tr>
+      <tr><td>static tiers</td><td class="num">52.5 ± 3.1 %</td></tr>
+      <tr><td>usage-proportional</td><td class="num">17.7 ± 0.9 %</td></tr>
+      <tr><td>max-min water-filling</td><td class="num">9.7 ± 0.8 %</td></tr>
+      <tr class="us"><td>DAFB-v2 (this tool)</td><td class="num">6.0 ± 0.9 %</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Waste drops from ~60% of budget (equal split) to ~2.5%.
+  The conditions where v2 does <em>not</em> win are in the report too.</p>
+
+  <h2>How verdicts are decided</h2>
+  <p>For seat products with no per-user cap API (M365 Copilot, GitHub
+  Copilot), the tool issues one of three verdicts per seat. The rules are
+  printed on every report it generates — no black box in front of a client.</p>
+  <div class="verdicts">
+    <!-- tilts are the project's real deterministic hash of each verdict word -->
+    <span class="stamp" style="color:var(--verdict-keep);transform:rotate(-1deg)">keep</span>
+    <p>Active in the last 14 days (across 2+ apps, where app-level data
+    exists — M365; GitHub Copilot reports activity only).</p>
+    <span class="stamp" style="color:var(--verdict-review);transform:rotate(-2deg)">review</span>
+    <p>Last activity 15–45 days ago, or single-app use where app-level data
+    exists.</p>
+    <span class="stamp" style="color:var(--verdict-reclaim);transform:rotate(1deg)">reclaim</span>
+    <p>No Copilot activity in 45+ days (or never).</p>
+  </div>
+
+  <h2>What's enforceable where</h2>
+  <table>
+    <thead><tr><th>Your setup</th><th>What token-optim can do</th></tr></thead>
+    <tbody>
+      <tr><td>API traffic behind LiteLLM</td><td>Hard per-user budgets + dynamic fair-share pool</td></tr>
+      <tr><td>Anthropic / OpenAI API direct</td><td>Coarse workspace limits + per-user advisories</td></tr>
+      <tr><td>Claude Code seats, GitHub Copilot</td><td>Advisory reports + seat-tier recommendations — no per-user cap APIs exist</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Install</h2>
+  <pre class="cmd">pip install token-optim    # or: uvx --from token-optim token-optim --help</pre>
+  <p>Report generation runs locally; uploaded exports never leave the
+  machine. A React front-end for the seat-review workflow ships in the repo
+  (<span class="mono">gui/</span>), styled like this page.</p>
+
+  <footer>MIT · <a href="https://github.com/AlrikOlson/token-optim">github.com/AlrikOlson/token-optim</a> · benchmarks regenerable via <span class="mono">python benchmark.py</span></footer>
+</main>
+</body>
+</html>
